@@ -1,0 +1,30 @@
+#!/bin/bash
+echo "Setting up CAN Bus Lab Environment..."
+
+# Update system
+sudo apt update
+sudo apt upgrade -y
+
+# Install required packages
+sudo apt install -y python3 python3-pip python3-venv git
+
+# Install Python CAN libraries
+pip3 install python-can
+pip3 install isotp
+pip3 install udsoncan
+
+# Setup virtual CAN interface
+sudo modprobe can
+sudo modprobe can_raw
+sudo modprobe vcan
+
+# Create virtual CAN interface
+sudo ip link add dev vcan0 type vcan
+sudo ip link set up vcan0
+
+# Verify the interface
+echo "Virtual CAN interface status:"
+ip -details link show vcan0
+
+echo "Setup completed successfully!"
+echo "You can now run the ECU emulator and diagnostic tester."

@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+"""
+ECU Emulator - Server that responds to diagnostic requests
+Simulates an Engine Control Unit
+"""
+import can
+import time
+import struct
+
+class ECUEmulator:
+    def __init__(self, channel='vcan0', bustype='virtual'):
+        self.bus = can.interface.Bus(channel=channel, bustype=bustype)
+        self.engine_rpm = 1726  # Default RPM value
+        
+    def calculate_rpm_response(self):
+        """Convert RPM to CAN response format (0x41 0C 1A F8)"""
+        rpm_bytes = struct.pack('>H', self.engine_rpm)
+        return bytes([0x41, 0x0C]) + rpm_bytes
+    
+    def handle_request(self, msg):
+        """Process incoming diagnostic requests"""
+        if len(msg.data) >= 2:
+            if msg.data[0] == 0x01 and msg.data[1] == 0x0C:
+                print(f"Received RPM request from tester")
+                
+                response_data = self.calculate_rpm_response()
+                response_msg = can.Message(
+                    arbitration_id=0x7E0,
+                    data=response_data,
+                    is_extended_id=False
+                )
+                
+                self.bus.send(response_msg)
+                print(f"Sent RPM response: {response_data.hex().upper()} = {self.engine_rpm} RPM")
+                return True
+        return False
+    
+    def run(self):
+        """Main loop to listen for requests"""
+        print("ECU Emulator started. Listening for diagnostic requests...")
+        print("Press Ctrl+C to stop")
+        
+        try:
+            while True:
+                msg = self.bus.recv(timeout=1.0)
+                
+                if msg is not None:
+                    print(f"Received message: ID=0x{msg.arbitration_id:03X}, Data={msg.data.hex().upper()}")
+                    self.handle_request(msg)
+                
+                self.engine_rpm = 1700 + int(time.time() * 10) % 100
+                
+        except KeyboardInterrupt:
+            print("\nStopping ECU Emulator...")
+        finally:
+            self.bus.shutdown()
+
+if __name__ == "__main__":
+    ecu = ECUEmulator()
+    ecu.run()

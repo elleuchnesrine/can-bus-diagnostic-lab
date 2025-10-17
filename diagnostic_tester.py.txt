@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+"""
+Diagnostic Tester - Client that sends requests and receives responses
+Simulates a diagnostic scanner/tool
+"""
+import can
+import time
+import struct
+
+class DiagnosticTester:
+    def __init__(self, channel='vcan0', bustype='virtual'):
+        self.bus = can.interface.Bus(channel=channel, bustype=bustype)
+        
+    def send_rpm_request(self):
+        """Send request for Engine RPM (PID 0x0C)"""
+        request_data = bytes([0x01, 0x0C])
+        
+        request_msg = can.Message(
+            arbitration_id=0x7DF,
+            data=request_data,
+            is_extended_id=False
+        )
+        
+        self.bus.send(request_msg)
+        print(f"Sent RPM request: {request_data.hex().upper()}")
+        
+    def parse_rpm_response(self, data):
+        """Parse RPM response and calculate actual RPM"""
+        if len(data) >= 4 and data[0] == 0x41 and data[1] == 0x0C:
+            rpm = struct.unpack('>H', data[2:4])[0]
+            return rpm
+        return None
+        
+    def listen_for_responses(self, timeout=2.0):
+        """Listen for ECU responses"""
+        start_time = time.time()
+        
+        while time.time() - start_time < timeout:
+            msg = self.bus.recv(timeout=0.1)
+            
+            if msg is not None:
+                print(f"Received response: ID=0x{msg.arbitration_id:03X}, Data={msg.data.hex().upper()}")
+                
+                rpm = self.parse_rpm_response(msg.data)
+                if rpm is not None:
+                    print(f"✅ Engine RPM: {rpm} RPM")
+                    return rpm
+                    
+        print("❌ No response received within timeout period")
+        return None
+        
+    def test_communication(self):
+        """Test the complete request-response cycle"""
+        print("Starting diagnostic test...")
+        print("Press Ctrl+C to stop\n")
+        
+        try:
+            while True:
+                self.send_rpm_request()
+                rpm = self.listen_for_responses()
+                
+                if rpm is not None:
+                    print(f"✅ Successfully read Engine RPM: {rpm} RPM")
+                else:
+                    print("❌ Failed to read Engine RPM")
+                
+                print("Waiting 3 seconds before next request...\n")
+                time.sleep(3)
+                
+        except KeyboardInterrupt:
+            print("\nStopping diagnostic tester...")
+        finally:
+            self.bus.shutdown()
+
+if __name__ == "__main__":
+    tester = DiagnosticTester()
+    tester.test_communication()

@@ -1,0 +1,28 @@
+# CAN Bus Diagnostic Communication Lab Report
+
+## Objective
+Simulate automotive diagnostic communication between a diagnostic tester (client) and an ECU (server) using virtual CAN bus.
+
+## Setup Overview
+### Components:
+1. **Diagnostic Tester (Client)**: Python script that sends OBD-II requests
+2. **ECU Emulator (Server)**: Python script that responds to diagnostic requests  
+3. **Virtual CAN Bus (vcan0)**: Communication channel simulating real CAN bus
+
+### Communication Flow:
+
+
+## Technical Specifications
+### CAN Message Format:
+- **Request**: ID=0x7DF, Data=[0x01, 0x0C]
+- **Response**: ID=0x7E0, Data=[0x41, 0x0C, RPM_HI, RPM_LO]
+
+## Results
+The simulation successfully demonstrates:
+- ✅ CAN bus communication setup
+- ✅ Diagnostic request/response protocol
+- ✅ Real-time RPM data exchange
+- ✅ Error handling and timeout management
+
+## Conclusion
+This lab successfully simulates real-world automotive diagnostic communication using virtual CAN bus.
