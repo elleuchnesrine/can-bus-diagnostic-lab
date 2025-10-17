@@ -8,7 +8,7 @@ This lab demonstrates real-world automotive diagnostic protocols using OBD-II st
 
 ### 🏗️ Architecture
 
-
+![image alt](https://github.com/elleuchnesrine/can-bus-diagnostic-lab/blob/2ebe24d74c703f9cc330ba4c43ef060add50b734/architecture.JPG)
 
 ### 🎯 Key Features
 - **Virtual CAN Bus** simulation using vcan0 interface
