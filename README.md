@@ -17,15 +17,9 @@ This lab demonstrates real-world automotive diagnostic protocols using OBD-II st
 - **Dynamic RPM simulation** with realistic variations
 - **Error handling** and timeout management
 
-## 🚀 Quick Start
+
 
 ### Prerequisites
 - Windows with WSL2 (Ubuntu) or Linux environment
 - Python 3.6+
 
-### Installation & Setup
-
-1. **Clone the repository**
-```bash
-git clone https://github.com/YOUR_USERNAME/can-bus-diagnostic-lab.git
-cd can-bus-diagnostic-lab
